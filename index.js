@@ -14,8 +14,7 @@ var preliminaryScanResults
 // Wait until we have a working wifi connection. Retry every 3 seconds up
 // to 10 times. If we are connected, then start just start the next stage
 // and exit. But if we never get a wifi connection, go into AP mode.
-waitForWifi( 20, 3000 )
-  .then( runNextStageAndExit )
+waitForWifi( 10, 3000 )
   .catch( () => { startServer(); startAP() } )
 
 // Return a promise, then check every interval ms for a wifi connection.
@@ -133,34 +132,11 @@ function handleConnect( request, response ) {
   // but a 5 second wait seems to work better.
   wait( 2000 )
     .then( () => wifi.stopAP() )
-    .then( () => wait( 5000 ) )
+    .then( () => wait( 10000 ) )
     .then( () => wifi.defineNetwork( ssid, password ) )
-    .then( () => waitForWifi( 20, 3000 ) )
-    .then( () => runNextStageAndExit() )
+    .then( () => waitForWifi( 10, 3000 ) )
     .catch( () => {
-      // XXX not sure how to handle an error here
-      run( 'sudo ifdown --force wlan0 && ifup wlan0' )
-        .then( ( out ) => console.log( 'Next stage started:', out ) )
-        .catch( ( err ) => console.error( 'Error starting next stage:', err ) )
-        .then( () => process.exit() )
+      run( 'sudo reboot' )
       console.error( "Failed to bring up wifi in handleConnect()" )
     } )
-}
-
-// Once wifi is up, we run the next stage command, if there is one, and exit.
-function runNextStageAndExit() {
-  if( platform.nextStageCommand ) {
-    run( platform.nextStageCommand )
-      .then( ( out ) => console.log( 'Next stage started:', out ) )
-      .catch( ( err ) => console.error( 'Error starting next stage:', err ) )
-      .then( () => process.exit() )
-  }
-  else {
-    process.exit()
-  }
-}
-
-// You can use this to give user feedback during the setup process.
-function play( filename ) {
-  return run( platform.playAudio, { AUDIO: filename } )
 }
