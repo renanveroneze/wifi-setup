@@ -3,7 +3,7 @@ module.exports = {
 
   // Define this nextStageCommand property to specify what we should
   // do once wifi is up. If not defined, we'll just exit
-//  nextStageCommand: 'systemctl start git-auto-updater',
+  //nextStageCommand: '',
 
   playAudio: 'aplay -q $AUDIO',
 
